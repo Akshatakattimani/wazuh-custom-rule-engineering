@@ -1,40 +1,47 @@
 # Wazuh Custom Rule Engineering
 
+![Architecture](diagrams/architecture.png)
+
 ## Overview
 
-This project demonstrates the development, validation, and testing of a custom Wazuh detection rule for SSH authentication failures in a virtual SOC environment.
+This project demonstrates the development and testing of a custom Wazuh detection rule for monitoring SSH authentication failures in a virtual Security Operations Center (SOC) lab.
 
-The project simulates failed SSH login attempts from a Windows virtual machine to a Kali Linux server running the Wazuh Manager. Authentication failures are detected by Wazuh, investigated using Threat Hunting, and analyzed through the Wazuh Dashboard.
-
----
-
-## Project Objectives
-
-- Create a custom Wazuh detection rule.
-- Validate the custom rule before deployment.
-- Configure the SSH service for testing.
-- Generate SSH authentication failures.
-- Detect authentication failures using Wazuh.
-- Investigate events using Threat Hunting.
-- Visualize alerts in the Wazuh Dashboard.
+A Windows virtual machine acts as the SSH client, while a Kali Linux virtual machine hosts both the SSH server and the Wazuh Manager. Failed SSH login attempts are generated intentionally, detected by Wazuh, investigated using Threat Hunting, and visualized through the Wazuh Dashboard.
 
 ---
 
-## Lab Environment
+# Objectives
 
-| Component | Description |
-|-----------|-------------|
+- Develop a custom Wazuh detection rule.
+- Configure the SSH service for authentication testing.
+- Generate failed SSH login attempts.
+- Validate Wazuh rule configuration.
+- Investigate authentication events using Threat Hunting.
+- Analyze alerts through the Wazuh Dashboard.
+
+---
+
+# Lab Architecture
+
+![Lab Architecture](diagrams/architecture.png)
+
+---
+
+# Environment
+
+| Component | Details |
+|-----------|---------|
 | Host Machine | Windows Laptop |
+| Virtualization | VirtualBox |
 | Client VM | Windows VM (192.168.56.101) |
 | Server VM | Kali Linux (192.168.56.102) |
-| SIEM Platform | Wazuh 4.x |
-| Operating System | Kali Linux |
-| Communication | SSH |
-| Virtualization | VirtualBox |
+| SIEM Platform | Wazuh Manager |
+| Protocol | SSH |
+| Detection | Wazuh Rule Engine |
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```
 wazuh-custom-rule-engineering/
@@ -43,6 +50,10 @@ wazuh-custom-rule-engineering/
 │   ├── local_rules.xml
 │   ├── ssh-configuration.md
 │   └── validation-commands.md
+│
+├── diagrams/
+│   ├── architecture.png
+│   └── architecture-diagram.md
 │
 ├── queries/
 │   └── threat-hunting-query.md
@@ -57,12 +68,13 @@ wazuh-custom-rule-engineering/
 │   ├── threat-hunting-events.png
 │   └── dashboard-overview.png
 │
-└── README.md
+├── README.md
+└── LICENSE
 ```
 
 ---
 
-# Implementation
+# Implementation Workflow
 
 ## Step 1 – Create Custom Wazuh Rule
 
@@ -72,18 +84,7 @@ A custom detection rule was created in:
 /var/ossec/etc/rules/local_rules.xml
 ```
 
-The rule extends the existing SSH authentication detection rule and identifies failed SSH authentication attempts originating from the Windows virtual machine.
-
-### Configuration
-
-```xml
-<rule id="100200" level="7">
-    <if_sid>5760</if_sid>
-    <field name="data.srcip">192.168.56.101</field>
-    <description>SSH authentication failed from monitored Windows VM (192.168.56.101)</description>
-    <group>custom,sshd,authentication_failed,</group>
-</rule>
-```
+The rule extends the existing SSH authentication detection logic and targets failed SSH login attempts originating from the Windows virtual machine.
 
 ### Screenshot
 
@@ -91,11 +92,11 @@ The rule extends the existing SSH authentication detection rule and identifies f
 
 ---
 
-## Step 2 – Validate the Rule
+## Step 2 – Validate Rule Configuration
 
-Before deployment, the configuration was validated.
+The custom rule configuration was validated before deployment.
 
-Command used:
+Validation command:
 
 ```bash
 sudo /var/ossec/bin/wazuh-analysisd -t
@@ -105,7 +106,7 @@ Purpose:
 
 - Validate XML syntax
 - Detect configuration errors
-- Ensure the Wazuh Manager can load the rule
+- Ensure Wazuh can load the custom rule
 
 ### Screenshot
 
@@ -115,7 +116,7 @@ Purpose:
 
 ## Step 3 – Configure SSH
 
-Password authentication was enabled for SSH testing.
+Password authentication was enabled to allow authentication testing.
 
 Verification command:
 
@@ -123,7 +124,7 @@ Verification command:
 sudo sshd -T | grep passwordauthentication
 ```
 
-Expected output:
+Expected Output
 
 ```
 passwordauthentication yes
@@ -137,7 +138,7 @@ passwordauthentication yes
 
 ## Step 4 – Verify SSH Service
 
-The SSH service was confirmed to be running.
+The SSH service was confirmed to be active before testing.
 
 Command:
 
@@ -145,22 +146,17 @@ Command:
 sudo systemctl status ssh
 ```
 
-Purpose:
-
-- Verify SSH service availability
-- Accept incoming SSH connections
-
 ### Screenshot
 
 ![SSH Service](screenshots/ssh-service-running.png)
 
 ---
 
-## Step 5 – Generate Authentication Failure
+## Step 5 – Generate Failed Authentication
 
-An SSH connection was initiated from the Windows VM to the Kali Linux server.
+An SSH connection was initiated from the Windows VM to the Kali Linux VM.
 
-```
+```bash
 ssh akshata19@192.168.56.102
 ```
 
@@ -178,20 +174,20 @@ An incorrect password was intentionally entered to generate authentication failu
 
 ## Step 6 – Threat Hunting
 
-The generated events were investigated using the Wazuh Threat Hunting module.
+Authentication failure events were investigated using the Wazuh Threat Hunting module.
 
-Filter used:
+Query used:
 
 ```
 rule.id:5760
 ```
 
-The Threat Hunting dashboard displayed:
+Observed information:
 
-- SSH authentication failures
-- Rule ID 5760
-- Kali agent
-- Event timestamps
+- Authentication failures
+- Rule ID
+- Agent name
+- Event timestamp
 - Alert severity
 
 ### Screenshot
@@ -202,15 +198,15 @@ The Threat Hunting dashboard displayed:
 
 ## Step 7 – Dashboard Analysis
 
-Authentication failures were successfully visualized in the Wazuh Dashboard.
+Detected authentication failures were visualized through the Wazuh Dashboard.
 
-The dashboard provided:
+The dashboard provides:
 
-- Authentication failure statistics
-- Alert counts
-- Timeline visualization
+- Authentication statistics
+- Alert overview
+- Event timeline
 - MITRE ATT&CK mapping
-- Security event overview
+- Security monitoring dashboard
 
 ### Screenshot
 
@@ -225,7 +221,7 @@ Windows VM
 (192.168.56.101)
         │
         ▼
-SSH Connection
+SSH Login Attempt
         │
         ▼
 Incorrect Password
@@ -234,17 +230,14 @@ Incorrect Password
 Authentication Failure
         │
         ▼
-Kali SSH Server
+Kali Linux SSH Server
 (192.168.56.102)
         │
         ▼
-Wazuh Rule 5760
+Wazuh Detection Engine
         │
         ▼
-Custom Rule Evaluation
-        │
-        ▼
-Threat Hunting
+Threat Hunting Investigation
         │
         ▼
 Dashboard Visualization
@@ -254,43 +247,61 @@ Dashboard Visualization
 
 # Skills Demonstrated
 
-- Wazuh Rule Engineering
-- SIEM Event Analysis
+- Wazuh SIEM
+- Custom Rule Engineering
+- Detection Engineering
+- Threat Hunting
 - SSH Security Monitoring
 - Linux Administration
-- Threat Hunting
-- Log Analysis
-- Security Event Investigation
-- Detection Engineering
+- Security Event Analysis
 - SOC Operations
+- Incident Investigation
 
 ---
 
-# Tools Used
+# Tools & Technologies
 
 - Wazuh
 - Kali Linux
-- Windows Virtual Machine
+- Windows VM
 - VirtualBox
 - OpenSSH
-- Linux Terminal
+- Linux CLI
 
 ---
 
 # Key Learning Outcomes
 
-- Created a custom Wazuh detection rule.
-- Validated custom rule syntax before deployment.
-- Configured SSH authentication for testing.
+- Developed a custom Wazuh detection rule.
+- Validated Wazuh rule configuration before deployment.
+- Configured SSH for authentication testing.
 - Generated controlled authentication failures.
 - Investigated security events using Threat Hunting.
-- Analyzed authentication alerts through the Wazuh Dashboard.
-- Understood the complete workflow of detection engineering within a SOC environment.
+- Analyzed alerts through the Wazuh Dashboard.
+- Understood the complete detection engineering workflow in a SOC environment.
 
 ---
 
-## Author
+# MITRE ATT&CK
+
+| Technique | Description |
+|-----------|-------------|
+| T1110 | Brute Force / Password Guessing (Authentication Failures) |
+
+---
+
+# Future Improvements
+
+- Detect repeated authentication failures from a single source IP.
+- Trigger Active Response after multiple failed login attempts.
+- Integrate GeoIP-based detection.
+- Add email or Slack alert notifications.
+- Expand detection coverage for SSH attacks.
+
+---
+
+# Author
 
 **Akshata Kattimani**
 
-Cybersecurity | SOC Analyst | SIEM | Wazuh | Threat Hunting | Detection Engineering
+Cybersecurity Enthusiast | SOC Analyst | Wazuh | SIEM | Threat Hunting | Detection Engineeringtion Engineering
