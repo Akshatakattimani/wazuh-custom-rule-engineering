@@ -1,0 +1,6 @@
+<rule id="100200" level="7">
+    <if_sid>5760</if_sid>
+    <field name="data.srcip">192.168.56.101</field>
+    <description>SSH authentication failed from monitored Windows VM (192.168.56.101)</description>
+    <group>custom,sshd,authentication_failed,</group>
+</rule>
