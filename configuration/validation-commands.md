@@ -1,6 +1,8 @@
-# Rule Validation
+# Wazuh Rule Validation
 
-After creating the custom detection rule, the Wazuh rule configuration was validated before deployment.
+## Objective
+
+Validate the custom Wazuh rule before deployment.
 
 ## Validation Command
 
@@ -8,8 +10,12 @@ After creating the custom detection rule, the Wazuh rule configuration was valid
 sudo /var/ossec/bin/wazuh-analysisd -t
 ```
 
-## Purpose
+## Expected Result
 
-- Validate XML syntax
-- Check for rule configuration errors
-- Ensure Wazuh can successfully load the custom rule
+The command validates the XML syntax and confirms that the custom rule can be loaded successfully without errors.
+
+## Why Validation Is Important
+
+- Detects XML syntax errors
+- Prevents invalid rule deployment
+- Confirms the Wazuh manager can parse the custom rule
